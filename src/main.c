@@ -1,4 +1,4 @@
-#define F_CPU 8000000UL
+#define F_CPU 16000000UL
 #define __DELAY_BACKWARD_COMPATIBLE__
 
 #include <avr/io.h>
@@ -6,9 +6,9 @@
 #include <avr/interrupt.h>
 #include <avr/power.h>
 
-int ditdelay = 30;
-int dahdelay = 90;
-int tone = 660;
+int ditdelay = 60;
+int dahdelay = 180;
+int tone = 440;
 
 void setup();
 void loop();
@@ -35,7 +35,7 @@ void setup(){
     PORTD |= (1<<2); //INT0 PULLUP
     PORTD |= (1<<3); //INT1 PULLUP
     
-    GIMSK=0x03;
+    EIMSK=0x03;
     MCUCR=0x00;
     sei();
 }
@@ -54,30 +54,30 @@ ISR(INT1_vect){
 }
 
 void doDit(){
-    Tone(tone,ditdelay);
     PORTB |= (1<<5);
-    _delay_ms(ditdelay);
+    Tone(tone,ditdelay);
     PORTB &= ~(1<<5);
+    _delay_ms(3*ditdelay);
 }
 
 void doDah(){
-    Tone(tone,dahdelay);
     PORTB |= (1<<5);
-    _delay_ms(dahdelay);
+    Tone(tone,dahdelay);
     PORTB &= ~(1<<5);
+    _delay_ms(3*ditdelay);
 }
 
 void Tone(float freq, float duration){
     freq = 1/freq;
     freq = freq/2;
     freq = freq*(1000000);
-    int i;
-    for(i=0; i<= duration;i=i+1){
-        i++;
+    int i = 0;
+    while(i <= duration){
         PORTD |= (1<<5);
         _delay_us(freq);
         PORTD &= ~(1<<5);
         _delay_us(freq);
+        _delay_us(1000);
+        i=i+1;
     }
-
 } 
